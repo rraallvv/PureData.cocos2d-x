@@ -25,10 +25,36 @@
 #include "AppDelegate.h"
 #include "cocos2d.h"
 
+#import "PdAudioUnit.h"
+#import "PdBase.h"
+#import "AudioHelpers.h"
+
+static NSString *const kPatchName = @"test.pd";
+
 USING_NS_CC;
 
 int main(int argc, char *argv[])
 {
     AppDelegate app;
+
+	PdAudioUnit *pdAudioUnit;
+
+	// PURE DATA INITIALIZATION -----------------------------------------------
+
+	pdAudioUnit = [[PdAudioUnit alloc] init];
+	[pdAudioUnit configureWithSampleRate:44100 numberChannels:2 inputEnabled:NO];
+	[pdAudioUnit print];
+	//[self.pdAudioUnit ]
+
+	void *handle = [PdBase openFile:kPatchName path:[[NSBundle mainBundle] resourcePath]];
+	if( handle ) {
+		AU_LOG(@"patch successfully opened %@.", kPatchName);
+	} else {
+		AU_LOG(@"error: patch failed to open %@.", kPatchName);
+	}
+
+	pdAudioUnit.active = YES;
+	AU_LOG(@"PdAudioUnit audio active: %@", (pdAudioUnit.isActive ? @"YES" : @"NO" ) );
+
     return Application::getInstance()->run();
 }
