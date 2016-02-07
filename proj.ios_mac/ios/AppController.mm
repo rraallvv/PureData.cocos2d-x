@@ -28,6 +28,17 @@
 #import "AppDelegate.h"
 #import "RootViewController.h"
 
+#import "PdAudioUnit.h"
+#import "PdBase.h"
+#import "AudioHelpers.h"
+
+@interface AppController ()
+
+@property (strong, nonatomic) PdAudioUnit *pdAudioUnit;
+@end
+
+static NSString *const kPatchName = @"test.pd";
+
 @implementation AppController
 
 #pragma mark -
@@ -85,6 +96,23 @@ static AppDelegate s_sharedApplication;
     cocos2d::Director::getInstance()->setOpenGLView(glview);
 
     app->run();
+
+	// PURE DATA INITIALIZATION -----------------------------------------------
+
+	self.pdAudioUnit = [[PdAudioUnit alloc] init];
+	[self.pdAudioUnit configureWithSampleRate:44100 numberChannels:2 inputEnabled:NO];
+	[self.pdAudioUnit print];
+	//[self.pdAudioUnit ]
+
+	void *handle = [PdBase openFile:kPatchName path:[[NSBundle mainBundle] resourcePath]];
+	if( handle ) {
+		AU_LOG(@"patch successfully opened %@.", kPatchName);
+	} else {
+		AU_LOG(@"error: patch failed to open %@.", kPatchName);
+	}
+
+	self.pdAudioUnit.active = YES;
+	AU_LOG(@"PdAudioUnit audio active: %@", (self.pdAudioUnit.isActive ? @"YES" : @"NO" ) );
 
     return YES;
 }
